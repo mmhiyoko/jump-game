@@ -9,6 +9,7 @@ type CatState = {
     y: number;
     velocity: number;
     jumpCount: number;
+    color: string;
 }
 
 let catState: CatState = {
@@ -16,11 +17,14 @@ let catState: CatState = {
     y: GAME.cat.initialPosition.y,
     velocity: 0,
     jumpCount: 0,
+    color: GAME.cat.initialColor,
 };
 
 window.addEventListener('keydown', (event) => {
     if (event.code === 'Space' && catState.jumpCount < GAME.cat.maxJumpCount) {
-        catState.velocity = -GAME.jumpAbsolutePower;
+        const isFirstJump = catState.jumpCount === 0;
+        const jumpPower = isFirstJump ? GAME.cat.jumpAbsolutePower : GAME.cat.jumpAbsolutePower * GAME.cat.secondJumpMultiplier;
+        catState.velocity = - jumpPower;
         catState.jumpCount++;
     }
 });
@@ -36,7 +40,13 @@ function updateCatState(catState: CatState): CatState {
         newJumpCount = 0;
     }
 
-    return { x: catState.x, y: newY, velocity: newVelocity, jumpCount: newJumpCount };
+    return {
+        x: catState.x,
+        y: newY,
+        velocity: newVelocity,
+        jumpCount: newJumpCount,
+        color: (newJumpCount == 2) ? "red" : GAME.cat.initialColor,
+    };
 }
 
 
@@ -45,7 +55,7 @@ function gameLoop() {
 
     catState = updateCatState(catState);
 
-    ctx.fillStyle = GAME.cat.color;
+    ctx.fillStyle = catState.color;
     ctx.fillRect(catState.x, catState.y, GAME.cat.size.width, GAME.cat.size.height);
 
     requestAnimationFrame(gameLoop);

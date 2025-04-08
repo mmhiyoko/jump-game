@@ -1,11 +1,12 @@
 export const GAME = {
     gravity: 0.5,
-    jumpAbsolutePower: 15,
     cat: {
         size: { width: 50, height: 50 },
         initialPosition: { x: 50, y: 300 },
+        jumpAbsolutePower: 15,
+        secondJumpMultiplier: 0.7,
         maxJumpCount: 2,
-        color: "orange",
+        initialColor: "orange",
     },
     canvas: {
         width: 480,
