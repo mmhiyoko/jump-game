@@ -1,0 +1,17 @@
+# node_modules（依存パッケージ）
+node_modules/
+
+# 出力ディレクトリ（Viteのbuild出力）
+dist/
+
+# 一時ファイル・ログ
+*.log
+*.tmp
+
+# OS固有
+.DS_Store
+Thumbs.db
+
+# Viteキャッシュ
+.vite/
+
