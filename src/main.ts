@@ -34,8 +34,8 @@ function updateCatState(catState: CatState): CatState {
     let newY = catState.y + newVelocity;
     let newJumpCount = catState.jumpCount;
 
-    if (newY > GAME.groundY) {
-        newY = GAME.groundY;
+    if (newY > GAME.groundY - GAME.cat.size.height + 4) {
+        newY = GAME.groundY - GAME.cat.size.height + 4;
         newVelocity = 0;
         newJumpCount = 0;
     }
@@ -49,16 +49,50 @@ function updateCatState(catState: CatState): CatState {
     };
 }
 
+const CAT_WALK_FRAMES = 4;
+const FRAME_WIDTH = 512;
+const FRAME_HEIGHT = 512;
+const FRAMES_PER_ROW = 2;
+const FRAME_DURATION = 6;
+const catWalkImage = new Image();
+catWalkImage.src = "/cat_walk.png";
+
+let walkFrame = 0;
+let frameCount = 0;
+
+function drawGround(ctx: CanvasRenderingContext2D) {
+    ctx.fillStyle = "#444";
+    ctx.fillRect(0, GAME.groundY, canvas.width, 10);
+}
 
 function gameLoop() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
     catState = updateCatState(catState);
 
-    ctx.fillStyle = catState.color;
-    ctx.fillRect(catState.x, catState.y, GAME.cat.size.width, GAME.cat.size.height);
+    frameCount++;
+    if (frameCount >= FRAME_DURATION) {
+        walkFrame = (walkFrame + 1) % CAT_WALK_FRAMES;
+        frameCount = 0;
+    }
+
+    // 行・列からフレーム位置を計算
+    const col = walkFrame % FRAMES_PER_ROW;
+    const row = Math.floor(walkFrame / FRAMES_PER_ROW);
+
+    ctx.drawImage(
+        catWalkImage,
+        col * FRAME_WIDTH, row * FRAME_HEIGHT, // sx, sy
+        FRAME_WIDTH, FRAME_HEIGHT, // sw, sh
+        catState.x, catState.y,
+        GAME.cat.size.width, GAME.cat.size.height,
+    )
+
+    drawGround(ctx);
 
     requestAnimationFrame(gameLoop);
 }
 
-gameLoop();
+catWalkImage.onload = () => {
+    gameLoop();
+}
