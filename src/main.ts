@@ -55,14 +55,14 @@ const FRAME_HEIGHT = 512;
 const FRAMES_PER_ROW = 2;
 const FRAME_DURATION = 6;
 const catWalkImage = new Image();
-catWalkImage.src = "/cat_walk.png";
+catWalkImage.src = import.meta.env.BASE_URL + "/cat_walk.png";
 
 let walkFrame = 0;
 let frameCount = 0;
 
 function drawGround(ctx: CanvasRenderingContext2D) {
     ctx.fillStyle = "#444";
-    ctx.fillRect(0, GAME.groundY, canvas.width, 10);
+    ctx.fillRect(2, GAME.groundY, canvas.width, 10);
 }
 
 function gameLoop() {
