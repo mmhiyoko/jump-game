@@ -20,14 +20,29 @@ let catState: CatState = {
     color: GAME.cat.initialColor,
 };
 
-window.addEventListener('keydown', (event) => {
+// Define constants for frame-related values
+const FRAME_CONFIG = {
+    CAT_WALK_FRAMES: 4,
+    FRAME_WIDTH: 512,
+    FRAME_HEIGHT: 512,
+    FRAMES_PER_ROW: 2,
+    FRAME_DURATION: 6,
+};
+
+// Initialize cat walk image
+const catWalkImage = new Image();
+catWalkImage.src = import.meta.env.BASE_URL + "/cat_walk.png";
+
+// Refactor event listener into a separate function
+function handleKeyDown(event: KeyboardEvent) {
     if (event.code === 'Space' && catState.jumpCount < GAME.cat.maxJumpCount) {
         const isFirstJump = catState.jumpCount === 0;
         const jumpPower = isFirstJump ? GAME.cat.jumpAbsolutePower : GAME.cat.jumpAbsolutePower * GAME.cat.secondJumpMultiplier;
-        catState.velocity = - jumpPower;
+        catState.velocity = -jumpPower;
         catState.jumpCount++;
     }
-});
+}
+window.addEventListener('keydown', handleKeyDown);
 
 function updateCatState(catState: CatState): CatState {
     let newVelocity = catState.velocity + GAME.gravity;
@@ -49,50 +64,48 @@ function updateCatState(catState: CatState): CatState {
     };
 }
 
-const CAT_WALK_FRAMES = 4;
-const FRAME_WIDTH = 512;
-const FRAME_HEIGHT = 512;
-const FRAMES_PER_ROW = 2;
-const FRAME_DURATION = 6;
-const catWalkImage = new Image();
-catWalkImage.src = import.meta.env.BASE_URL + "/cat_walk.png";
-
 let walkFrame = 0;
 let frameCount = 0;
 
+// Refactor ground drawing into a separate function
 function drawGround(ctx: CanvasRenderingContext2D) {
     ctx.fillStyle = "#444";
     ctx.fillRect(2, GAME.groundY, canvas.width, 10);
 }
 
+// Refactor cat drawing into a separate function
+function drawCat(ctx: CanvasRenderingContext2D, catState: CatState, frame: number) {
+    const col = frame % FRAME_CONFIG.FRAMES_PER_ROW;
+    const row = Math.floor(frame / FRAME_CONFIG.FRAMES_PER_ROW);
+
+    ctx.drawImage(
+        catWalkImage,
+        col * FRAME_CONFIG.FRAME_WIDTH, row * FRAME_CONFIG.FRAME_HEIGHT, // sx, sy
+        FRAME_CONFIG.FRAME_WIDTH, FRAME_CONFIG.FRAME_HEIGHT, // sw, sh
+        catState.x, catState.y,
+        GAME.cat.size.width, GAME.cat.size.height,
+    );
+}
+
+// Refactor game loop logic
 function gameLoop() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
     catState = updateCatState(catState);
 
     frameCount++;
-    if (frameCount >= FRAME_DURATION) {
-        walkFrame = (walkFrame + 1) % CAT_WALK_FRAMES;
+    if (frameCount >= FRAME_CONFIG.FRAME_DURATION) {
+        walkFrame = (walkFrame + 1) % FRAME_CONFIG.CAT_WALK_FRAMES;
         frameCount = 0;
     }
 
-    // 行・列からフレーム位置を計算
-    const col = walkFrame % FRAMES_PER_ROW;
-    const row = Math.floor(walkFrame / FRAMES_PER_ROW);
-
-    ctx.drawImage(
-        catWalkImage,
-        col * FRAME_WIDTH, row * FRAME_HEIGHT, // sx, sy
-        FRAME_WIDTH, FRAME_HEIGHT, // sw, sh
-        catState.x, catState.y,
-        GAME.cat.size.width, GAME.cat.size.height,
-    )
-
+    drawCat(ctx, catState, walkFrame);
     drawGround(ctx);
 
     requestAnimationFrame(gameLoop);
 }
 
+// Start the game loop when the image is loaded
 catWalkImage.onload = () => {
     gameLoop();
-}
+};
